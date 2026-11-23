@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Job Tracker</string>
+    <string name="app_subtitle">Dubai &amp; Europe আবেদনসমূহ</string>
+    <string name="login_button">Google দিয়ে লগইন করুন</string>
+    <string name="privacy_note">আপনার আবেদন ও তথ্য শুধু আপনার অ্যাকাউন্টের জন্য সুরক্ষিত থাকবে।</string>
+    <string name="delete_demo_button">ডেমো ডেটা মুছুন</string>
+    <string name="empty_state_title">কোনো আবেদন পাওয়া যায়নি</string>
+</resources>

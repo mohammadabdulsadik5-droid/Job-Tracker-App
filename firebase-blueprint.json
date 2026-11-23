@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "JobApplication": {
+      "title": "JobApplication",
+      "description": "A job application tracked by an authenticated user under users/{userId}/applications.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID matching request.auth.uid"
+        },
+        "company": {
+          "type": "string",
+          "description": "Company or employer name (1-150 chars)"
+        },
+        "role": {
+          "type": "string",
+          "description": "Job title or role applied for (1-150 chars)"
+        },
+        "region": {
+          "type": "string",
+          "enum": ["asia", "africa", "europe", "namerica", "samerica", "oceania", "russia", "turkey"]
+        },
+        "country": {
+          "type": "string",
+          "description": "Country name"
+        },
+        "city": {
+          "type": "string",
+          "description": "City name"
+        },
+        "date": {
+          "type": "string",
+          "description": "Application date in yyyy-MM-dd ISO format"
+        },
+        "followDate": {
+          "type": "string",
+          "description": "Follow-up reminder date in yyyy-MM-dd ISO format"
+        },
+        "cvSet": {
+          "type": "string",
+          "enum": ["Dubai", "Europe", "Other"]
+        },
+        "cvFile": {
+          "type": "string",
+          "description": "CV file label"
+        },
+        "website": {
+          "type": "string",
+          "description": "Normalized http/https website URL"
+        },
+        "email": {
+          "type": "string",
+          "description": "Employer or HR email(s)"
+        },
+        "confirmCode": {
+          "type": "string",
+          "description": "Application confirmation reference code"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["applied", "followup", "interview", "rejected", "offer"]
+        },
+        "notes": {
+          "type": "string",
+          "description": "User notes"
+        },
+        "demoEntry": {
+          "type": "boolean",
+          "description": "Whether this item is one of the initial demo applications"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()"
+        }
+      },
+      "required": [
+        "userId",
+        "company",
+        "role",
+        "region",
+        "country",
+        "city",
+        "date",
+        "followDate",
+        "cvSet",
+        "cvFile",
+        "website",
+        "email",
+        "confirmCode",
+        "status",
+        "notes",
+        "demoEntry",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/applications/{applicationId}": {
+      "schema": {
+        "$ref": "#/entities/JobApplication"
+      },
+      "description": "Per-user job applications collection isolated by userId == request.auth.uid"
+    }
+  }
+}

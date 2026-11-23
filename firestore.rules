@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidRegion(r) {
+      return r in ['asia', 'africa', 'europe', 'namerica', 'samerica', 'oceania', 'russia', 'turkey'];
+    }
+
+    function isValidCvSet(cv) {
+      return cv in ['Dubai', 'Europe', 'Other'];
+    }
+
+    function isValidStatus(st) {
+      return st in ['applied', 'followup', 'interview', 'rejected', 'offer'];
+    }
+
+    function isValidApplication(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.company is string && data.company.size() >= 1 && data.company.size() <= 150 &&
+             data.role is string && data.role.size() >= 1 && data.role.size() <= 150 &&
+             data.region is string && isValidRegion(data.region) &&
+             data.country is string && data.country.size() <= 100 &&
+             data.city is string && data.city.size() <= 100 &&
+             data.date is string && data.date.size() == 10 &&
+             data.followDate is string && data.followDate.size() <= 10 &&
+             data.cvSet is string && isValidCvSet(data.cvSet) &&
+             data.cvFile is string && data.cvFile.size() <= 150 &&
+             data.website is string && data.website.size() <= 300 &&
+             data.email is string && data.email.size() <= 300 &&
+             data.confirmCode is string && data.confirmCode.size() <= 100 &&
+             data.status is string && isValidStatus(data.status) &&
+             data.notes is string && data.notes.size() <= 2000 &&
+             data.demoEntry is bool;
+    }
+
+    match /users/{userId}/applications/{applicationId} {
+      allow get: if isOwner(userId) && isValidId(applicationId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(applicationId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'company', 'role', 'region', 'country', 'city',
+                         'date', 'followDate', 'cvSet', 'cvFile', 'website', 'email',
+                         'confirmCode', 'status', 'notes', 'demoEntry', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'company', 'role', 'region', 'country', 'city',
+                         'date', 'followDate', 'cvSet', 'cvFile', 'website', 'email',
+                         'confirmCode', 'status', 'notes', 'demoEntry', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       isValidApplication(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(applicationId) &&
+                       isValidApplication(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp &&
+                       incoming().updatedAt <= request.time &&
+                       (
+                         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'company', 'role', 'region', 'country', 'city',
+                           'date', 'followDate', 'cvSet', 'cvFile', 'website', 'email',
+                           'confirmCode', 'status', 'notes', 'demoEntry', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isOwner(userId) && isValidId(applicationId);
+    }
+  }
+}

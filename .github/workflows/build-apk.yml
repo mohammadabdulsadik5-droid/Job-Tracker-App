@@ -1,0 +1,53 @@
+name: Build Job Tracker APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
+      - name: Restore signing debug keystore
+        run: |
+          if [ -f debug.keystore.base64 ] && [ ! -f debug.keystore ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
+
+      - name: Build Debug APK
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Rename APK for easy install
+        run: cp app/build/outputs/apk/debug/app-debug.apk Job-Tracker.apk
+
+      - name: Upload Job-Tracker.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: Job-Tracker-APK
+          path: Job-Tracker.apk
+          if-no-files-found: error
+          retention-days: 30

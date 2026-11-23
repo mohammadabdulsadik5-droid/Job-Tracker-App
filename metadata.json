@@ -1,0 +1,6 @@
+{
+  "name": "Job Tracker",
+  "description": "Job Application Tracker — Dubai & Europe আবেদনসমূহ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
